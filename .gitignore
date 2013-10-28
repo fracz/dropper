@@ -11,3 +11,10 @@
 *.lai
 *.la
 *.a
+
+# Other files to ignore
+*.exe
+*.~*
+*.obj
+*.tds
+*.res
