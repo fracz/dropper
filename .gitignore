@@ -18,3 +18,11 @@
 *.obj
 *.tds
 *.res
+
+/.idea
+/target
+/bin
+*.class
+/.settings
+.project
+.buildpath
