@@ -17,6 +17,6 @@ public class AppDispatcher {
     }
 
     private void displayHelp() {
-        new HelpFormatter().printHelp("Dropper", App.OPTIONS);
+        new HelpFormatter().printHelp("Dropper", DropperOptions.get());
     }
 }
