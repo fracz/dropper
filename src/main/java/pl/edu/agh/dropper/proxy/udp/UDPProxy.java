@@ -1,4 +1,4 @@
-package pl.edu.agh.dropper.udp;
+package pl.edu.agh.dropper.proxy.udp;
 
 
 import java.net.DatagramSocket;

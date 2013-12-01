@@ -43,12 +43,17 @@ public interface Proxy {
      *
      * @param port port where the incoming data should be forwarded
      */
-    void setRemotePort(int port);
+    void setDestinationPort(int port);
 
     /**
      * Sets the remote address where the data should be forwarded.
      *
      * @param address address where the incoming data should be forwarded
      */
-    void setRemoteAddress(InetAddress address);
+    void setDestinationAddress(InetAddress address);
+
+    /**
+     * Starts the proxy.
+     */
+    void startProxy();
 }

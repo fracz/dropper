@@ -1,4 +1,4 @@
-package pl.edu.agh.dropper.udp;
+package pl.edu.agh.dropper.proxy.udp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -12,7 +12,7 @@ public class UDPClientThread extends Thread {
     private final int port;
     private final UDPProxy server;
     private boolean running;
-   
+
     public UDPClientThread(UDPProxy server, DatagramSocket clientSocket, DatagramSocket remoteSocket,
                            InetAddress clientAddr, int clientPort) {
         this.server = server;
@@ -27,7 +27,7 @@ public class UDPClientThread extends Thread {
      * Odbiera pakiety przychodzace 'z zewnatrz' (response) i przesyla je do odpowiedniego klienta
      */
     public void run() {
-        while(isRunning()) {
+        while (isRunning()) {
             byte[] buf = new byte[1500]; //TODO: sprawdzic jaka wartosc tutaj wsadzic
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             try {
@@ -48,5 +48,5 @@ public class UDPClientThread extends Thread {
     synchronized public void finish() {
         running = false;
     }
-    
+
 }
