@@ -10,7 +10,7 @@ import java.util.Random;
  * Packet manipulator that changes their order.
  */
 public class MixingManipulator extends AbstractPacketManipulator {
-    private final List<Packet> knownPackets = new ArrayList<Packet>();
+    private final List<Packet> knownPackets = new ArrayList<>();
 
     private final Random random = new Random(System.currentTimeMillis());
 
