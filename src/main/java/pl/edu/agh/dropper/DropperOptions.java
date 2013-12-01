@@ -35,6 +35,12 @@ public class DropperOptions {
                 .withDescription("Address of the host that the data should be proxied to.")
                 .isRequired()
                 .create('a'));
+        options.addOption(OptionBuilder
+                .hasArg()
+                .withArgName("0-1")
+                .withDescription("The probability of packets drop.")
+                .isRequired()
+                .create("drop"));
         options.addOption("v", "verbose", false, "Turns on the verbose mode.");
         options.addOption("h", "help", false, "Displays this help info.");
         return options;

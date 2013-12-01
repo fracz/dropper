@@ -1,10 +1,12 @@
 package pl.edu.agh.dropper.proxy;
 
+import pl.edu.agh.dropper.proxy.udp.UDPProxy;
+
 /**
  * Enumerates supported proxy types.
  */
 public enum ProxyType {
-    UDP(null);
+    UDP(UDPProxy.class);
 
     private final Class<? extends Proxy> proxyClass;
 

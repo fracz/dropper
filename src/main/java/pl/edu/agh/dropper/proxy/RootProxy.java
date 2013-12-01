@@ -2,9 +2,16 @@ package pl.edu.agh.dropper.proxy;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
+import pl.edu.agh.dropper.manipulator.BandwidthManipulator;
+import pl.edu.agh.dropper.manipulator.ChangingManipulator;
+import pl.edu.agh.dropper.manipulator.DroppingManipulator;
+import pl.edu.agh.dropper.manipulator.MixingManipulator;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Class responsible for forwarding the packets.
@@ -12,6 +19,12 @@ import java.net.UnknownHostException;
 public class RootProxy {
 
     private final Proxy proxy;
+
+    private final List<PacketManipulator> manipulators = Collections.synchronizedList(new ArrayList<PacketManipulator>());
+
+    private final DestinationSender destinationSender = new DestinationSender();
+
+    private final SourceSender sourceSender = new SourceSender();
 
     public RootProxy(String proxyType) throws ProxyException {
         try {
@@ -30,6 +43,7 @@ public class RootProxy {
             setSourcePort(options);
             setDestinationPort(options);
             setDestinationAddress(options);
+            initializeManipulators(options);
         } catch (Exception e) {
             throw new ProxyException(e);
         }
@@ -43,6 +57,8 @@ public class RootProxy {
 
     public void start() {
         proxy.startProxy();
+        destinationSender.start();
+        sourceSender.start();
     }
 
     private void setSourcePort(CommandLine options) throws NumberFormatException {
@@ -55,5 +71,53 @@ public class RootProxy {
         String portValue = options.getOptionValue('d');
         int port = Integer.valueOf(portValue);
         proxy.setDestinationPort(port);
+    }
+
+    private void initializeManipulators(CommandLine options) {
+        if (options.hasOption('b'))
+            manipulators.add(new BandwidthManipulator());
+        if (options.hasOption("drop"))
+            manipulators.add(new DroppingManipulator(getProbability(options, "drop")));
+        if (options.hasOption("mix"))
+            manipulators.add(new MixingManipulator(getProbability(options, "mix")));
+        if (options.hasOption("change"))
+            manipulators.add(new ChangingManipulator(getProbability(options, "change")));
+    }
+
+    private double getProbability(CommandLine options, String paramName) {
+        String propValue = options.getOptionValue(paramName);
+        return Double.valueOf(propValue);
+    }
+
+    private Packet manipulatePacket(Packet packet) {
+        Packet manipulated = packet;
+        for (PacketManipulator manipulator : manipulators) {
+            manipulated = manipulator.manipulate(packet);
+            if (manipulated == null)
+                break;
+        }
+        return manipulated;
+    }
+
+    private class DestinationSender extends Thread {
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                Packet packet = proxy.receiveSource();
+                packet = manipulatePacket(packet);
+                proxy.sendDestination(packet);
+            }
+        }
+    }
+
+    private class SourceSender extends Thread {
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                Packet packet = proxy.receiveDestination();
+                packet = manipulatePacket(packet);
+                proxy.sendSource(packet);
+            }
+        }
     }
 }

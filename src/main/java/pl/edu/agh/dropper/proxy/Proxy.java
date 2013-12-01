@@ -4,7 +4,7 @@ import java.net.InetAddress;
 
 public interface Proxy {
     /**
-     * Receive next packet sent to the monitored application.
+     * Receive next packet sent to the monitored application. This methods MUST be synchronous.
      *
      * @return packet data that was received from monitored application
      */
@@ -12,6 +12,7 @@ public interface Proxy {
 
     /**
      * Receives next packet sent from the destination machine to the monitored application (destination response).
+     * This methods MUST be synchronous.
      *
      * @return packet data that was received from destination machine
      */

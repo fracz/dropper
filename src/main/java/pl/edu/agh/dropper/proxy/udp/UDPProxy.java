@@ -1,15 +1,15 @@
 package pl.edu.agh.dropper.proxy.udp;
 
 
+import pl.edu.agh.dropper.proxy.Packet;
+import pl.edu.agh.dropper.proxy.Proxy;
+
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 
-/**
- * Klasa sluzaca do zarzadzania serwerem udp
- */
-public class UDPProxy {
+public class UDPProxy implements Proxy {
     private ArrayList<UDPProxyThread> threads;
     
     public UDPProxy() {
@@ -40,18 +40,42 @@ public class UDPProxy {
         }
     }
 
-    /**
-     * Ustawia procent pakietow, ktore maja byc zablokowane
-     */
-    public void setDropRate() {
-        //TODO
+    @Override
+    public Packet receiveSource() {
+        return null;
     }
 
-    /**
-     * Ustawia maksymalna przepustowosc serwera udp
-     */
-    public void setBandwidth() {
-        //TODO
+    @Override
+    public Packet receiveDestination() {
+        return null;
     }
 
+    @Override
+    public void sendSource(Packet packet) {
+
+    }
+
+    @Override
+    public void sendDestination(Packet packet) {
+
+    }
+
+    @Override
+    public void setSourcePort(int port) {
+
+    }
+
+    @Override
+    public void setDestinationPort(int port) {
+
+    }
+
+    @Override
+    public void setDestinationAddress(InetAddress address) {
+
+    }
+
+    @Override
+    public void startProxy() {
+    }
 }
