@@ -92,9 +92,9 @@ public class RootProxy {
     private Packet manipulatePacket(Packet packet) {
         Packet manipulated = packet;
         for (PacketManipulator manipulator : manipulators) {
-            manipulated = manipulator.manipulate(packet);
             if (manipulated == null)
                 break;
+            manipulated = manipulator.manipulate(packet);
         }
         return manipulated;
     }
@@ -105,7 +105,8 @@ public class RootProxy {
             while (!Thread.currentThread().isInterrupted()) {
                 Packet packet = proxy.receiveSource();
                 packet = manipulatePacket(packet);
-                proxy.sendDestination(packet);
+                if (packet != null)
+                    proxy.sendDestination(packet);
             }
         }
     }
@@ -116,7 +117,8 @@ public class RootProxy {
             while (!Thread.currentThread().isInterrupted()) {
                 Packet packet = proxy.receiveDestination();
                 packet = manipulatePacket(packet);
-                proxy.sendSource(packet);
+                if (packet != null)
+                    proxy.sendSource(packet);
             }
         }
     }

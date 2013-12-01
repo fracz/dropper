@@ -18,6 +18,7 @@ public class App
         try {
             options = new BasicParser().parse(DropperOptions.get(), args);
         } catch (ParseException e) {
+            System.out.println(e.getMessage());
             displayHelp();
             System.exit(1);
             return null; // for compiler only
@@ -31,6 +32,7 @@ public class App
             RootProxy proxy = new RootProxy(type);
             proxy.setOptions(options);
             proxy.start();
+            System.out.println("Proxy has been started.");
         } catch (Exception e) {
             if (options.hasOption('v')) {
                 e.printStackTrace();
