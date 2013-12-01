@@ -1,4 +1,4 @@
-package pl.edu.agh.dropper.proxy;
+package pl.edu.agh.dropper.udp;
 
 
 import java.net.DatagramSocket;
@@ -7,7 +7,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 /**
- * Klasa sluzaca do zarzadzania serwerem proxy
+ * Klasa sluzaca do zarzadzania serwerem udp
  */
 public class UDPProxy {
     private ArrayList<UDPProxyThread> threads;
@@ -48,7 +48,7 @@ public class UDPProxy {
     }
 
     /**
-     * Ustawia maksymalna przepustowosc serwera proxy
+     * Ustawia maksymalna przepustowosc serwera udp
      */
     public void setBandwidth() {
         //TODO

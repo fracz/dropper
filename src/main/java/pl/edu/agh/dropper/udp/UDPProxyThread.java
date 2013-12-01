@@ -1,4 +1,4 @@
-package pl.edu.agh.dropper.proxy;
+package pl.edu.agh.dropper.udp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
