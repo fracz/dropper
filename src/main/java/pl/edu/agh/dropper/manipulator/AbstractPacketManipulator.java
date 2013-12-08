@@ -31,6 +31,6 @@ public abstract class AbstractPacketManipulator implements PacketManipulator {
 
     private boolean shouldManipulate() {
         int rand = Math.abs(random.nextInt(100));
-        return probability < rand;
+        return probability > rand;
     }
 }

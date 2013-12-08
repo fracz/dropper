@@ -21,7 +21,7 @@ public class ChangingManipulator extends AbstractPacketManipulator {
         byte[] bytes = new byte[bytesToChange];
         random.nextBytes(bytes);
         for (byte b : bytes)
-            data[random.nextInt(data.length)] = b;
+            data[Math.abs(random.nextInt(data.length))] = b;
         Packet modified = new Packet(data);
         return modified;
     }
