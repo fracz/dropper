@@ -1,5 +1,7 @@
 package pl.edu.agh.dropper.proxy;
 
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.util.Objects;
 
 /**
@@ -7,9 +9,19 @@ import java.util.Objects;
  */
 public class Packet {
     private byte[] data;
+    private InetAddress fromAddr;
+    private InetAddress toAddr;
+    private int fromPort;
+    private int toPort;
 
     public Packet(byte[] data) {
         setData(data);
+    }
+
+    public Packet(DatagramPacket dp) {
+        setData(dp.getData());
+        setSourceAddr(dp.getAddress());
+        setSourcePort(dp.getPort());
     }
 
     public byte[] getData() {
@@ -19,6 +31,22 @@ public class Packet {
     public void setData(byte[] data) {
         this.data = data;
     }
+
+    public void setSourceAddr(InetAddress addr) { this.fromAddr = addr; }
+
+    public InetAddress getSourceAddr() { return fromAddr; }
+
+    public void setDestinationAddr(InetAddress addr) { this.toAddr = addr; }
+
+    public InetAddress getDestinationAddr() { return toAddr; }
+
+    public void setSourcePort(int port) { this.fromPort = port; }
+
+    public int getSourcePort() { return fromPort; }
+
+    public void setDestinationPort(int port) { this.toPort = port; }
+
+    public int getDestinationPort() { return toPort; }
 
     @Override
     public int hashCode() {
