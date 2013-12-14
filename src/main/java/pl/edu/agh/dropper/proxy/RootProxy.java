@@ -26,6 +26,8 @@ public class RootProxy {
 
     private final SourceSender sourceSender = new SourceSender();
 
+    private CommandLine options;
+
     public RootProxy(String proxyType) throws ProxyException {
         try {
             if (StringUtils.isEmpty(proxyType)) {
@@ -39,17 +41,19 @@ public class RootProxy {
     }
 
     public void setOptions(CommandLine options) throws ProxyException {
+        this.options = options;
         try {
-            setSourcePort(options);
-            setDestinationPort(options);
-            setDestinationAddress(options);
-            initializeManipulators(options);
+            setSourcePort();
+            setDestinationAddress();
+            setDestinationPort();
+            System.out.println(String.format("Redirects traffic to %s:%s", options.getOptionValue('a'), options.getOptionValue('d')));
+            initializeManipulators();
         } catch (Exception e) {
             throw new ProxyException(e);
         }
     }
 
-    private void setDestinationAddress(CommandLine options) throws UnknownHostException {
+    private void setDestinationAddress() throws UnknownHostException {
         String addressValue = options.getOptionValue('a');
         InetAddress address = InetAddress.getByName(addressValue);
         proxy.setDestinationAddress(address);
@@ -61,30 +65,47 @@ public class RootProxy {
         sourceSender.start();
     }
 
-    private void setSourcePort(CommandLine options) throws NumberFormatException {
+    private boolean isVerbose() {
+        return options.hasOption('v');
+    }
+
+    private void setSourcePort() throws NumberFormatException {
         String portValue = options.getOptionValue('s');
         int port = Integer.valueOf(portValue);
+        System.out.println("Proxy listens on port: " + port);
         proxy.setSourcePort(port);
     }
 
-    private void setDestinationPort(CommandLine options) throws NumberFormatException {
+    private void setDestinationPort() throws NumberFormatException {
         String portValue = options.getOptionValue('d');
         int port = Integer.valueOf(portValue);
         proxy.setDestinationPort(port);
     }
 
-    private void initializeManipulators(CommandLine options) {
-        if (options.hasOption('b'))
-            manipulators.add(new BandwidthManipulator(Integer.valueOf(options.getOptionValue('b'))));
-        if (options.hasOption("drop"))
-            manipulators.add(new DroppingManipulator(getProbability(options, "drop")));
-        if (options.hasOption("mix"))
-            manipulators.add(new MixingManipulator(getProbability(options, "mix")));
-        if (options.hasOption("change"))
-            manipulators.add(new ChangingManipulator(getProbability(options, "change")));
+    private void initializeManipulators() {
+        if (options.hasOption('b')) {
+            int bandwidth = Integer.valueOf(options.getOptionValue('b'));
+            manipulators.add(new BandwidthManipulator(bandwidth));
+            System.out.println("Simulated bandwidth: " + bandwidth + " kb/s");
+        }
+        if (options.hasOption("drop")) {
+            double probability = getProbability("drop");
+            manipulators.add(new DroppingManipulator(probability));
+            System.out.println("Packets drop: " + (Math.floor(probability * 100) + "%"));
+        }
+        if (options.hasOption("mix")) {
+            double probability = getProbability("mix");
+            manipulators.add(new MixingManipulator(probability));
+            System.out.println("Packets order mix: " + (Math.floor(probability * 100) + "%"));
+        }
+        if (options.hasOption("change")) {
+            double probability = getProbability("change");
+            manipulators.add(new ChangingManipulator(probability));
+            System.out.println("Packets content change: " + (Math.floor(probability * 100) + "%"));
+        }
     }
 
-    private double getProbability(CommandLine options, String paramName) {
+    private double getProbability(String paramName) {
         String propValue = options.getOptionValue(paramName);
         return Double.valueOf(propValue);
     }
@@ -104,6 +125,8 @@ public class RootProxy {
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 Packet packet = proxy.receiveSource();
+                if (isVerbose())
+                    System.out.println(String.format("Received packet from destination (%d bytes)", packet.getData().length));
                 packet = manipulatePacket(packet);
                 if (packet != null)
                     proxy.sendDestination(packet);
@@ -116,6 +139,8 @@ public class RootProxy {
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 Packet packet = proxy.receiveDestination();
+                if (isVerbose())
+                    System.out.println(String.format("Received packet from source (%d bytes)", packet.getData().length));
                 packet = manipulatePacket(packet);
                 if (packet != null)
                     proxy.sendSource(packet);

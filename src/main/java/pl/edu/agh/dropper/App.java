@@ -6,8 +6,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 import pl.edu.agh.dropper.proxy.RootProxy;
 
-public class App
-{
+public class App {
     public static void main(String[] args) {
         CommandLine options = parseArgs(args);
         launch(options);
@@ -32,7 +31,6 @@ public class App
             RootProxy proxy = new RootProxy(type);
             proxy.setOptions(options);
             proxy.start();
-            System.out.println("Proxy has been started.");
         } catch (Exception e) {
             if (options.hasOption('v')) {
                 e.printStackTrace();
