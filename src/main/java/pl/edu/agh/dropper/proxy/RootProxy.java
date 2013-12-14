@@ -75,7 +75,7 @@ public class RootProxy {
 
     private void initializeManipulators(CommandLine options) {
         if (options.hasOption('b'))
-            manipulators.add(new BandwidthManipulator(64 * 1024));
+            manipulators.add(new BandwidthManipulator(Integer.valueOf(options.getOptionValue('b'))));
         if (options.hasOption("drop"))
             manipulators.add(new DroppingManipulator(getProbability(options, "drop")));
         if (options.hasOption("mix"))

@@ -40,6 +40,22 @@ public class DropperOptions {
                 .withArgName("0-1")
                 .withDescription("The probability of packets drop.")
                 .create("drop"));
+        options.addOption(OptionBuilder
+                .hasArg()
+                .withArgName("0-1")
+                .withDescription("The probability of packets order mix.")
+                .create("mix"));
+        options.addOption(OptionBuilder
+                .hasArg()
+                .withArgName("0-1")
+                .withDescription("The probability of packets content change.")
+                .create("change"));
+        options.addOption(OptionBuilder
+                .hasArg()
+                .withArgName("kbps")
+                .withDescription("Simulated bandwidth in kilobytes per second.")
+                .withLongOpt("bandwidth")
+                .create('b'));
         options.addOption("v", "verbose", false, "Turns on the verbose mode.");
         options.addOption("h", "help", false, "Displays this help info.");
         return options;
