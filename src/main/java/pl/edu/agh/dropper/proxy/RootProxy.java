@@ -1,5 +1,6 @@
 package pl.edu.agh.dropper.proxy;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 import pl.edu.agh.dropper.manipulator.BandwidthManipulator;
@@ -9,8 +10,6 @@ import pl.edu.agh.dropper.manipulator.MixingManipulator;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,11 +19,9 @@ public class RootProxy {
 
     private final Proxy proxy;
 
-    private final List<PacketManipulator> manipulators = Collections.synchronizedList(new ArrayList<PacketManipulator>());
+    private DestinationSender destinationSender;
 
-    private final DestinationSender destinationSender = new DestinationSender();
-
-    private final SourceSender sourceSender = new SourceSender();
+    private SourceSender sourceSender;
 
     private CommandLine options;
 
@@ -46,11 +43,22 @@ public class RootProxy {
             setSourcePort();
             setDestinationAddress();
             setDestinationPort();
-            System.out.println(String.format("Redirects traffic to %s:%s", options.getOptionValue('a'), options.getOptionValue('d')));
-            initializeManipulators();
+            describe();
         } catch (Exception e) {
             throw new ProxyException(e);
         }
+    }
+
+    private void describe() {
+        System.out.println(String.format("Redirects traffic to %s:%s", options.getOptionValue('a'), options.getOptionValue('d')));
+        if (options.hasOption('b'))
+            System.out.println("Simulated bandwidth: " + Integer.valueOf(options.getOptionValue('b')) + " kb/s");
+        if (options.hasOption("drop"))
+            System.out.println("Packets drop: " + (Math.floor(getProbability("drop") * 100) + "%"));
+        if (options.hasOption("mix"))
+            System.out.println("Packets order mix: " + (Math.floor(getProbability("mix") * 100) + "%"));
+        if (options.hasOption("change"))
+            System.out.println("Packets content change: " + (Math.floor(getProbability("change") * 100) + "%"));
     }
 
     private void setDestinationAddress() throws UnknownHostException {
@@ -60,6 +68,8 @@ public class RootProxy {
     }
 
     public void start() {
+        destinationSender = new DestinationSender();
+        sourceSender = new SourceSender();
         proxy.startProxy();
         destinationSender.start();
         sourceSender.start();
@@ -82,27 +92,25 @@ public class RootProxy {
         proxy.setDestinationPort(port);
     }
 
-    private void initializeManipulators() {
+    private List<PacketManipulator> getManipulators() {
+        ImmutableList.Builder<PacketManipulator> manipulators = new ImmutableList.Builder<>();
         if (options.hasOption('b')) {
             int bandwidth = Integer.valueOf(options.getOptionValue('b'));
             manipulators.add(new BandwidthManipulator(bandwidth));
-            System.out.println("Simulated bandwidth: " + bandwidth + " kb/s");
         }
         if (options.hasOption("drop")) {
             double probability = getProbability("drop");
             manipulators.add(new DroppingManipulator(probability));
-            System.out.println("Packets drop: " + (Math.floor(probability * 100) + "%"));
         }
         if (options.hasOption("mix")) {
             double probability = getProbability("mix");
             manipulators.add(new MixingManipulator(probability));
-            System.out.println("Packets order mix: " + (Math.floor(probability * 100) + "%"));
         }
         if (options.hasOption("change")) {
             double probability = getProbability("change");
             manipulators.add(new ChangingManipulator(probability));
-            System.out.println("Packets content change: " + (Math.floor(probability * 100) + "%"));
         }
+        return manipulators.build();
     }
 
     private double getProbability(String paramName) {
@@ -110,17 +118,25 @@ public class RootProxy {
         return Double.valueOf(propValue);
     }
 
-    private Packet manipulatePacket(Packet packet) {
-        Packet manipulated = packet;
-        for (PacketManipulator manipulator : manipulators) {
-            if (manipulated == null)
-                break;
-            manipulated = manipulator.manipulate(packet);
+    private abstract class AbstractSender extends Thread {
+        protected final List<PacketManipulator> manipulators;
+
+        AbstractSender() {
+            manipulators = getManipulators();
         }
-        return manipulated;
+
+        protected Packet manipulatePacket(Packet packet) {
+            Packet manipulated = packet;
+            for (PacketManipulator manipulator : manipulators) {
+                if (manipulated == null)
+                    break;
+                manipulated = manipulator.manipulate(packet);
+            }
+            return manipulated;
+        }
     }
 
-    private class DestinationSender extends Thread {
+    private class DestinationSender extends AbstractSender {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
@@ -135,7 +151,7 @@ public class RootProxy {
         }
     }
 
-    private class SourceSender extends Thread {
+    private class SourceSender extends AbstractSender {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
