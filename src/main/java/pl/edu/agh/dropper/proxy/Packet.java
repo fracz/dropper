@@ -59,4 +59,8 @@ public class Packet {
             return Objects.equals(((Packet) obj).data, data);
         return false;
     }
+
+    public String toString() {
+        return String.format("Packet\tfrom: %s:%d\tto: %s:%d", fromAddr.toString(), fromPort, toAddr.toString(), toPort);
+    }
 }

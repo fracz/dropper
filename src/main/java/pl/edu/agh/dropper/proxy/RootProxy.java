@@ -126,7 +126,8 @@ public class RootProxy {
             while (!Thread.currentThread().isInterrupted()) {
                 Packet packet = proxy.receiveSource();
                 if (isVerbose())
-                    System.out.println(String.format("Received packet from destination (%d bytes)", packet.getData().length));
+                    System.out.println(String.format("Received packet from source (%d bytes): %s",
+                            packet.getData().length, packet.toString()));
                 packet = manipulatePacket(packet);
                 if (packet != null)
                     proxy.sendDestination(packet);
@@ -140,7 +141,8 @@ public class RootProxy {
             while (!Thread.currentThread().isInterrupted()) {
                 Packet packet = proxy.receiveDestination();
                 if (isVerbose())
-                    System.out.println(String.format("Received packet from source (%d bytes)", packet.getData().length));
+                    System.out.println(String.format("Received packet from destination (%d bytes): %s",
+                            packet.getData().length, packet.toString()));
                 packet = manipulatePacket(packet);
                 if (packet != null)
                     proxy.sendSource(packet);
