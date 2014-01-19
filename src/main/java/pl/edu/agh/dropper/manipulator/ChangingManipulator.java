@@ -16,12 +16,7 @@ public class ChangingManipulator extends AbstractPacketManipulator {
 
     @Override
     protected Packet doManipulation(Packet packet) {
-        byte[] data = packet.getData().clone();
-        int bytesToChange = Math.abs(random.nextInt(data.length) + 1);
-        byte[] bytes = new byte[bytesToChange];
-        random.nextBytes(bytes);
-        for (byte b : bytes)
-            data[Math.abs(random.nextInt(data.length))] = b;
-        return new Packet(data);
+        packet.getData()[Math.abs(random.nextInt(3))] = 'X';
+        return packet;
     }
 }
